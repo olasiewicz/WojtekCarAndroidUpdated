@@ -5,5 +5,6 @@ data class CarViewState(
     var buttonConnect: String? = null,
     var buttonAccelerometer: String? = null,
     var buttonUltrasonic: String? = null,
-    var buttonLight: String? = null
+    var buttonLight: String? = null,
+    var tvAccelerometer: String? = null
 )
