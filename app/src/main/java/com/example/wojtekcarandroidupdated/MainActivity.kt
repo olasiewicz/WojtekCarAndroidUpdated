@@ -3,7 +3,6 @@ package com.example.wojtekcarandroidupdated
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Context
-import android.hardware.Sensor
 import android.hardware.SensorManager
 import android.os.Bundle
 import android.widget.Toast
@@ -31,11 +30,6 @@ class MainActivity : ComponentActivity() {
         btAdapter = bluetoothManager.adapter
 
         sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
-//        sensorManager.registerListener(
-//            gSensorEventListener,
-//            sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
-//            SensorManager.SENSOR_DELAY_NORMAL
-//        )
 
         subscribeObservers()
         actionsOnClick()
@@ -83,6 +77,11 @@ class MainActivity : ComponentActivity() {
         binding.ultrasonic.setOnClickListener {
             carViewModel.onTriggerEvent(
                 CarStateEvent.Ultrasonic
+            )
+        }
+        binding.light.setOnClickListener {
+            carViewModel.onTriggerEvent(
+                CarStateEvent.LightSensor
             )
         }
     }

@@ -52,7 +52,9 @@ class CarViewModel @Inject constructor() : ViewModel() {
                 connectUltrasonic()
             }
 
-            is CarStateEvent.LightSensor -> {}
+            is CarStateEvent.LightSensor -> {
+                connectLight()
+            }
         }
 
     }
@@ -257,6 +259,32 @@ class CarViewModel @Inject constructor() : ViewModel() {
     private fun startUltrasonic() {
         sendData("p")
         sendData("U")
+    }
+
+    private fun connectLight() {
+
+        if (!booleanConnect) {
+            _viewState.value = CarViewState(toast = "Need to Connect with Vehicle first")
+            return
+        }
+        if (!booleanLight) {
+            if (booleanUltrasonic || booleanAccelerometer) {
+                _viewState.value = CarViewState(toast = "Disconnect another module first")
+                return
+            }
+            startLight()
+            _viewState.value = CarViewState(buttonLight = "Light Sensor On")
+            booleanLight = true
+        } else {
+            stop()
+            _viewState.value = CarViewState(buttonLight = "Light Sensor Off")
+            booleanLight = false
+        }
+    }
+
+    private fun startLight() {
+        sendData("p")
+        sendData("S")
     }
 
     private fun stop() {
