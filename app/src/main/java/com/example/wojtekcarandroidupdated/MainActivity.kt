@@ -80,5 +80,10 @@ class MainActivity : ComponentActivity() {
                 )
             )
         }
+        binding.ultrasonic.setOnClickListener {
+            carViewModel.onTriggerEvent(
+                CarStateEvent.Ultrasonic
+            )
+        }
     }
 }

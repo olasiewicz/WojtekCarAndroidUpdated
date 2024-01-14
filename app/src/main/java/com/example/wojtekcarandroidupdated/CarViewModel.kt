@@ -24,7 +24,6 @@ class CarViewModel @Inject constructor() : ViewModel() {
     private var booleanUltrasonic = false
     private var booleanAccelerometer = false
     private var booleanLight = false
-    private var control: Control = Control.STOP
     private val beetle_id = "00:13:03:21:06:14"
     private var x = 0
     private var y = 0
@@ -49,7 +48,10 @@ class CarViewModel @Inject constructor() : ViewModel() {
                 connectAccelerometer(event.sensorManager)
             }
 
-            is CarStateEvent.Ultrasonic -> {}
+            is CarStateEvent.Ultrasonic -> {
+                connectUltrasonic()
+            }
+
             is CarStateEvent.LightSensor -> {}
         }
 
@@ -119,8 +121,8 @@ class CarViewModel @Inject constructor() : ViewModel() {
 
     private fun startAccelerometer(sensorManager: SensorManager) {
 
-        sendData("p", "Pause")
-        sendData("A", "Accelerometer")
+        sendData("p")
+        sendData("A")
         gSensorEventListener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent) {
                 y = Math.round(event.values[0])
@@ -181,7 +183,7 @@ class CarViewModel @Inject constructor() : ViewModel() {
         _viewState.value = CarViewState(tvAccelerometer = "")
     }
 
-    private fun sendData(message: String, value: String) {
+    private fun sendData(message: String, value: String = "") {
         val command = message.toByteArray()
         try {
             outputStream = btSocket.outputStream
@@ -190,7 +192,7 @@ class CarViewModel @Inject constructor() : ViewModel() {
         }
         try {
             outputStream.write(command)
-            _viewState.value = CarViewState(tvAccelerometer = "$value, x: $x, y: $y")
+            if (booleanAccelerometer) _viewState.value = CarViewState(tvAccelerometer = "$value, x: $x, y: $y")
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -231,5 +233,34 @@ class CarViewModel @Inject constructor() : ViewModel() {
         PAUSE
     }
 
+
+    private fun connectUltrasonic() {
+        if (!booleanConnect) {
+            _viewState.value = CarViewState(toast = "Need to Connect with Vehicle first")
+            return
+        }
+        if (!booleanUltrasonic) {
+            if (booleanAccelerometer || booleanLight) {
+                _viewState.value = CarViewState(toast = "Disconnect another module first")
+                return
+            }
+            startUltrasonic()
+            _viewState.value = CarViewState(buttonUltrasonic = "Ultrasonic Sensor On")
+            booleanUltrasonic = true
+        } else {
+            stop()
+            _viewState.value = CarViewState(buttonUltrasonic = "Ultrasonic Sensor Off")
+            booleanUltrasonic = false
+        }
+    }
+
+    private fun startUltrasonic() {
+        sendData("p")
+        sendData("U")
+    }
+
+    private fun stop() {
+        sendData("X")
+    }
 
 }
