@@ -20,15 +20,16 @@ import javax.inject.Inject
 @HiltViewModel
 class CarViewModel @Inject constructor() : ViewModel() {
 
+    private val RFCOMM_UUID = "00001101-0000-1000-8000-00805F9B34FB"
+    private val BLUETOOTH_MAC = "00:13:03:21:06:14"  //btAdapter.bondedDevices
     private var booleanConnect = false
     private var booleanUltrasonic = false
     private var booleanAccelerometer = false
     private var booleanLight = false
-    private val beetle_id = "00:13:03:21:06:14"
     private var x = 0
     private var y = 0
 
-    private lateinit var nxtDevice: BluetoothDevice
+    private lateinit var btDevice: BluetoothDevice
     private lateinit var btSocket: BluetoothSocket
     private lateinit var outputStream: OutputStream
     private lateinit var gSensorEventListener: SensorEventListener
@@ -69,14 +70,14 @@ class CarViewModel @Inject constructor() : ViewModel() {
         }
 
         if (!booleanConnect) {
-            nxtDevice = btAdapter.getRemoteDevice(beetle_id)
+            btDevice = btAdapter.getRemoteDevice(BLUETOOTH_MAC) //btAdapter.bondedDevices
             try {
-                btSocket = nxtDevice.createRfcommSocketToServiceRecord(
-                    UUID
-                        .fromString("00001101-0000-1000-8000-00805F9B34FB")
+                btSocket = btDevice.createRfcommSocketToServiceRecord(
+                    UUID.fromString(RFCOMM_UUID)
                 )
                 btSocket.connect()
                 _viewState.value = CarViewState(toast = "Connected")
+                _viewState.value = CarViewState(tvAccelerometer = "${btAdapter.bondedDevices}")
             } catch (e: IOException) {
                 _viewState.value = CarViewState(toast = "Not Connected")
                 return
@@ -137,7 +138,6 @@ class CarViewModel @Inject constructor() : ViewModel() {
                         x <= -8 -> commands(Control.FAST_LEFT)
                         x in 3..7 -> commands(Control.RIGHT)
                         else -> commands(Control.FAST_RIGHT)
-
                     }
                 }
                 if (y <= -6) {
@@ -202,19 +202,19 @@ class CarViewModel @Inject constructor() : ViewModel() {
 
     private fun commands(controlValue: Control) {
         when (controlValue) {
-            Control.BACKWARD -> sendData("b", controlValue.name)
-            Control.FORWARD -> sendData("f", controlValue.name)
-            Control.FAST_FORWARD -> sendData("F", controlValue.name)
-            Control.RIGHT -> sendData("r", controlValue.name)
-            Control.RIGHT_B -> sendData(">", controlValue.name)
-            Control.FAST_RIGHT -> sendData("R", controlValue.name)
-            Control.FAST_RIGHT_B -> sendData("}", controlValue.name)
-            Control.LEFT -> sendData("l", controlValue.name)
-            Control.FAST_LEFT -> sendData("L", controlValue.name)
-            Control.LEFT_B -> sendData("<", controlValue.name)
-            Control.FAST_LEFT_B -> sendData("{", controlValue.name)
-            Control.STOP -> sendData("s", controlValue.name)
-            Control.PAUSE -> sendData("X", controlValue.name)
+            Control.BACKWARD -> sendData("b")
+            Control.FORWARD -> sendData("f")
+            Control.FAST_FORWARD -> sendData("F")
+            Control.RIGHT -> sendData("r")
+            Control.RIGHT_B -> sendData(">")
+            Control.FAST_RIGHT -> sendData("R")
+            Control.FAST_RIGHT_B -> sendData("}")
+            Control.LEFT -> sendData("l")
+            Control.FAST_LEFT -> sendData("L")
+            Control.LEFT_B -> sendData("<")
+            Control.FAST_LEFT_B -> sendData("{")
+            Control.STOP -> sendData("s")
+            Control.PAUSE -> sendData("X")
         }
     }
 
